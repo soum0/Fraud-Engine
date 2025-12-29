@@ -1,147 +1,116 @@
-🔹 Project Title
+# Credit Card Fraud Detection Engine
 
-Credit Card Fraud Detection System (ML + FastAPI + Docker)
-
-🔹 Overview
-
-This project is an end-to-end fraud detection system built using classical machine learning models and deployed as a production-style inference service.
-
-The system:
-
-Trains and evaluates multiple fraud detection models
-
-Converts probabilistic outputs into business decisions (BLOCK / ALLOW)
-
-Serves predictions via a FastAPI REST API
-
-Is fully containerized using Docker for reproducible deployment
-
-The design is inspired by real-world fintech systems (e.g., Stripe-style risk engines) where model outputs are separated from decision logic.
-
-🔹 Problem Statement
-
-Credit card fraud detection is a highly imbalanced classification problem, where fraudulent transactions are rare but extremely costly.
-
-Key challenges:
-
-Severe class imbalance
-
-Need for high recall at low false-positive rates
-
-Requirement for explainable, controllable decisioning
-
-Production constraints (latency, reproducibility, reliability)
-
-This project addresses these challenges using a multi-model, threshold-based risk scoring approach.
-
-🔹 Dataset
-
-Dataset: European Credit Card Transactions
-
-Source: Public Kaggle dataset
-
-Records: ~285,000 transactions
-
-Fraud rate: ~0.17%
-
-Features:
-
-V1–V28: PCA-transformed transaction features
-
-Time: Seconds since first transaction
-
-Amount: Transaction amount
-
-Class: Fraud label (1 = fraud, 0 = legitimate)
+An end-to-end fraud detection system that combines machine learning modeling with production-grade API deployment using FastAPI and Docker.
 
 
-🔹 System Architecture
+This project focuses on **real-world fraud decisioning**, not just model training.
 
-Incoming Transaction (JSON)
-        |
-        v
+---
+
+## 🚀 Key Features
+
+- Fraud probability prediction using ML models
+- Threshold-based business decisioning (BLOCK / ALLOW)
+- Runtime model switching (LR / RF / Ensemble)
+- REST API built with FastAPI
+- Fully containerized using Docker
+
+---
+
+## 🧠 Problem Overview
+
+Credit card fraud detection is a **highly imbalanced classification problem**, where fraudulent transactions are rare but costly.
+
+Challenges addressed:
+- Extreme class imbalance
+- Need for high recall with low false positives
+- Clear separation of ML scoring and business decisions
+- Production-ready deployment
+
+---
+
+## 📊 Dataset
+
+- European credit card transaction dataset
+- ~285,000 transactions
+- Fraud rate: ~0.17%
+- Features:
+  - `V1–V28`: PCA-transformed features
+  - `Time`: Time since first transaction
+  - `Amount`: Transaction amount
+
+---
+
+## 🏗 System Architecture
+
+Transaction JSON
+↓
 Feature Validation
-        |
-        v
+↓
 Preprocessing
-(StandardScaler for LR)
-        |
-        v
+(LR → Scaled | RF → Raw)
+↓
 Model Scoring
-(LR / RF / Ensemble)
-        |
-        v
-Threshold-based Decision
+↓
+Threshold Decision
 (BLOCK / ALLOW)
-        |
-        v
-FastAPI Response
+↓
+API Response
 
-🔹 Models Used
-Model	Purpose
-Logistic Regression	Interpretable, stable baseline
-Random Forest	Non-linear pattern capture
-Ensemble	Weighted combination of LR + RF
 
-The system supports runtime model switching:
 
-lr → Logistic Regression
+---
 
-rf → Random Forest
+## 🤖 Models Used
 
-ensemble → Combined score
+| Model | Purpose |
+|-----|--------|
+| Logistic Regression | Interpretable baseline |
+| Random Forest | Non-linear pattern detection |
+| Ensemble | Weighted LR + RF scoring |
 
-🔹 Decision Logic
+Supported modes:
+- `lr`
+- `rf`
+- `ensemble`
 
-Models output a fraud probability, not a decision.
+---
+
+## ⚖ Decision Logic
+
+Models output a **fraud probability**, not a final decision.
+
+
 
 Final decisions are made using a configurable threshold:
 
 fraud_score ≥ threshold  → BLOCK
 fraud_score < threshold  → ALLOW
 
-This allows business teams to tune risk tolerance without retraining models.
 
-Example:
+This allows risk tolerance to be adjusted **without retraining models**.
 
-Lower threshold → higher fraud catch rate, more false positives
+---
 
-Higher threshold → fewer false positives, more fraud leakage
+## 🌐 API Endpoints
 
-🔹 Evaluation Metrics
-
-Fraud detection is evaluated using appropriate metrics for imbalanced data:
-
-ROC-AUC
-
-Precision–Recall AUC
-
-Precision / Recall at selected thresholds
-
-Emphasis is placed on recall under constrained false-positive rates, aligning with real-world fraud systems.
-
-(Exact metrics can be added here if you want to include numbers)
-
-🔹 API Endpoints
-
-Health Check
+### Health Check
 GET /health
 
-Fraud Prediction
+
+### Predict Fraud
 POST /predict
 
+
+
 Example request:
+```json
 {
-  "transaction": {
-    "Time": 0.0,
-    "V1": -1.359807,
-    "V2": -0.072781,
-    "...": "...",
-    "Amount": 149.62
-  },
+  "transaction": { "...": "features" },
   "model": "ensemble",
   "threshold": 0.1
 }
+
 
 Example response:
 {
@@ -152,73 +121,67 @@ Example response:
 }
 
 
-🔹 Project Structure
+
+🗂 Project Structure
 
 fraud_engine/
-├── models/
-│   ├── scaler.joblib
-│   ├── lr_model.joblib
-│   ├── rf_model.joblib
-│   └── feature_columns.json
-│
+├── README.md
+├── 01_eda.ipynb
 ├── src/
 │   └── api/
 │       ├── main.py
 │       └── schemas.py
-│
-├── notebooks/
-│   └── 01_eda.ipynb
-│
+├── models/
 ├── Dockerfile
-├── requirements.txt
-└── README.md
+└── requirements.txt
 
-🔹 Running the Project (Docker)
 
-Build the image
+🐳 Running with Docker
+
+Build image:
 docker build -t fraud-engine .
 
-Run the container:
+Run container:
 docker run -p 8000:8000 fraud-engine
 
-Access API
 
-Health: http://127.0.0.1:8000/health
+Access:
 
-Swagger UI: http://127.0.0.1:8000/docs
+API: http://127.0.0.1:8000
 
-🔹 Key Design Decisions
+Docs: http://127.0.0.1:8000/docs
 
-Threshold-based decisioning instead of fixed probability cutoff
 
-Model switching and ensemble support for experimentation
+🧩 Design Highlights
 
-Separation of ML logic and business policy
+Separation of ML scoring and decision logic
 
-Containerized deployment for reproducibility
+Model-agnostic inference API
 
-🔹 Future Improvements
+Production-style project structure
 
-Add experiment tracking (MLflow)
+Reproducible deployment using Docker
 
-Add request logging and monitoring
+🔮 Future Improvements
 
-Implement data drift detection
+Model monitoring and drift detection
 
-Add CI/CD pipeline
+Experiment tracking (MLflow)
 
-Deploy on cloud infrastructure
+CI/CD pipeline
 
-🔹 Why This Project Matters
+Cloud deployment
+
+🎯 Why This Project Matters
 
 This project demonstrates:
 
-Practical machine learning modeling
+Applied machine learning
 
-Production-style ML system design
+ML system design
 
 API-based inference
 
-MLOps fundamentals (Docker, reproducibility)
+MLOps fundamentals
 
-Business-aware decision making
+Business-aware decisioning
