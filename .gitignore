@@ -1,0 +1,18 @@
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Data files
+creditcard.csv
+
+# Model artifacts
+*.joblib
+
+# OS files
+.DS_Store
